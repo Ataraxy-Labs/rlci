@@ -129,14 +129,15 @@ class TestCICDEnvironment:
         assert 0.65 <= detection_rate <= 0.75  # ~70% ± tolerance
 
     def test_reward_function_no_bug(self):
-        """Reward should be -t_exec when no bug escapes."""
+        """Reward should be -t_exec/T_full when no bug escapes."""
         env = CICDEnvironment(commits_per_episode=1, bug_probability=0.0, seed=42)
         env.reset()
         _, reward, _, _ = env.step(ACTION_FULL_TEST)
-        assert reward == -TEST_EXECUTION_TIME[ACTION_FULL_TEST]
+        expected = -TEST_EXECUTION_TIME[ACTION_FULL_TEST] / TEST_EXECUTION_TIME[ACTION_FULL_TEST]
+        assert reward == expected  # -1.0 for full test
 
     def test_reward_function_with_escaped_bug(self):
-        """Reward should include -β·I_bug_escaped penalty."""
+        """Reward should include -β penalty on bug escape."""
         env = CICDEnvironment(
             commits_per_episode=1000,
             beta=5.0,
@@ -147,7 +148,8 @@ class TestCICDEnvironment:
         # Skip tests - all bugs escape
         _, reward, _, info = env.step(ACTION_SKIP_TEST)
         if info["bug_escaped"]:
-            expected_reward = -TEST_EXECUTION_TIME[ACTION_SKIP_TEST] - 5.0 * BUG_ESCAPE_PENALTY
+            normalized_exec = TEST_EXECUTION_TIME[ACTION_SKIP_TEST] / TEST_EXECUTION_TIME[ACTION_FULL_TEST]
+            expected_reward = -normalized_exec - 5.0
             assert reward == expected_reward
 
     def test_episode_stats(self):
@@ -161,13 +163,13 @@ class TestCICDEnvironment:
         assert "defect_miss_rate" in stats
 
     def test_bug_introduction_probability(self):
-        """Test that ~15% of commits have bugs."""
+        """Test that commits have bugs at rates influenced by risk factors."""
         env = CICDEnvironment(commits_per_episode=10000, seed=42)
         env.reset()
         bugs = sum(1 for c in env.commits if c.has_bug)
         bug_rate = bugs / 10000
         # Adjusted bug prob is around 15% base but modulated by risk factors
-        assert 0.05 <= bug_rate <= 0.35
+        assert 0.05 <= bug_rate <= 0.40
 
     def test_reproducibility(self):
         """Same seed should produce identical episodes."""

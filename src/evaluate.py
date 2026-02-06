@@ -118,7 +118,7 @@ def evaluate_policy(
 def run_comparison(
     num_episodes: int = 2000,
     commits_per_episode: int = 100,
-    beta: float = 5.0,
+    beta: float = 15.0,
     num_runs: int = 5,
     training_episodes: int = 2000,
     verbose: bool = True,
@@ -284,7 +284,7 @@ def adversarial_evaluation(
     agent: DQNAgent,
     num_episodes: int = 500,
     commits_per_episode: int = 100,
-    beta: float = 5.0,
+    beta: float = 15.0,
     seed: int = 42,
 ) -> dict:
     """

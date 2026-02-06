@@ -110,7 +110,7 @@ class CICDEnvironment:
     def __init__(
         self,
         commits_per_episode: int = 100,
-        beta: float = 5.0,
+        beta: float = 15.0,
         bug_probability: float = BUG_INTRODUCTION_PROBABILITY,
         seed: Optional[int] = None,
     ):
@@ -168,9 +168,10 @@ class CICDEnvironment:
 
         # Bug probability influenced by commit characteristics
         # Higher diff size and complexity increase bug likelihood
+        # Stronger risk differentiation so agent can learn state-dependent policy
         risk_factor = 0.5 * diff_size + 0.3 * complexity + 0.2 * (1 - prior_pass_rate)
-        adjusted_bug_prob = self.bug_probability * (1 + risk_factor)
-        adjusted_bug_prob = min(adjusted_bug_prob, 0.5)  # Cap at 50%
+        adjusted_bug_prob = self.bug_probability * (0.3 + 2.5 * risk_factor)
+        adjusted_bug_prob = np.clip(adjusted_bug_prob, 0.02, 0.5)
         has_bug = self.rng.random() < adjusted_bug_prob
 
         return Commit(
@@ -226,10 +227,14 @@ class CICDEnvironment:
             bug_detected = self.rng.random() < detection_rate
             bug_escaped = not bug_detected
 
-        # Calculate reward: R = -t_exec - β · I_bug_escaped
-        reward = -exec_time
+        # Calculate reward: R = -(t_exec / T_full) - β · I_bug_escaped
+        # Normalize exec time by full test time so both reward components
+        # are on comparable scales, allowing β to effectively control
+        # the speed-safety tradeoff as described in the paper
+        normalized_exec = exec_time / TEST_EXECUTION_TIME[ACTION_FULL_TEST]
+        reward = -normalized_exec
         if bug_escaped:
-            reward -= self.beta * BUG_ESCAPE_PENALTY
+            reward -= self.beta
 
         # Update statistics
         self.episode_stats["total_execution_time"] += exec_time
