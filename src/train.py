@@ -20,7 +20,7 @@ from .agent import DQNAgent
 def train(
     num_episodes: int = 2000,
     commits_per_episode: int = 100,
-    beta: float = 15.0,
+    beta: float = 20.0,
     seed: int = 42,
     save_path: Optional[str] = None,
     verbose: bool = True,
@@ -33,7 +33,7 @@ def train(
     Args:
         num_episodes: Number of training episodes (default: 2000)
         commits_per_episode: Commits per episode (default: 100)
-        beta: Penalty weight for escaped defects (default: 5.0)
+        beta: Penalty weight for escaped defects (default: 20.0)
         seed: Random seed for reproducibility
         save_path: Path to save trained model
         verbose: Whether to print training progress

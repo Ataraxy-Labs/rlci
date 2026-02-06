@@ -228,7 +228,7 @@ class TestSimulationParameters:
         assert BUG_INTRODUCTION_PROBABILITY == 0.15
 
     def test_bug_escape_penalty(self):
-        assert BUG_ESCAPE_PENALTY == 15.0
+        assert BUG_ESCAPE_PENALTY == 20.0
 
     def test_state_dim(self):
         assert STATE_DIM == 10

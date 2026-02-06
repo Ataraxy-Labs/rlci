@@ -35,8 +35,8 @@ def main():
                         help="Training episodes (default: 2000)")
     parser.add_argument("--commits", type=int, default=100,
                         help="Commits per episode (default: 100)")
-    parser.add_argument("--beta", type=float, default=15.0,
-                        help="Defect penalty weight (default: 5.0)")
+    parser.add_argument("--beta", type=float, default=20.0,
+                        help="Defect penalty weight (default: 20.0)")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed (default: 42)")
     parser.add_argument("--runs", type=int, default=5,
